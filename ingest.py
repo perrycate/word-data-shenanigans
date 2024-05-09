@@ -61,4 +61,9 @@ print(f"Finished in {time.time() - start_time} seconds.")
 # 2. Transform the data into a more query-friendly schema.
 #
 
-# TODO
+# The USMALLINT instead of INT actually should save substantial memory at query time,
+# and thus improve the performance. If you think the count for any single word in a doc
+# could be more than 65k, feel free to change - earlier iterations used a normal-size
+# int and worked fine.
+con.sql("CREATE TABLE words (count USMALLINT, date DATE, publisher TEXT, doc TEXT)")
+# TODO(perry): Query for unnesting/pivoting counts_by_word into words table.
