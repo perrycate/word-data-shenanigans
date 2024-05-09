@@ -11,6 +11,14 @@ INPUT_FILES = [
 
 con = duckdb.connect(DB_NAME)
 
+# TODO(jacob):
+# Step 0: Transform the data to valid csv/json.
+# My lazy self generated the data as valid JSON contained in a csv file.
+# (so no '[' or ']' at the beginning/end of the line, the word counts were JSON
+# instead of a string-formatted python dict, etc.) Iirc you already had some code
+# to do this, so if you haven't saved the results of it already you'll probably
+# want to give that a go.
+
 #
 # 1.Ingest the raw data.
 #
@@ -26,6 +34,12 @@ con.sql("SET preserve_insertion_order = false;")
 # If you're pressed for disk space, there's no reason you couldn't transform the
 # data directly into the format needed and store that rather than also using this
 # intermediate table.
+# TODO(jacob): You'll need to either adjust this schema a bit, or tweak the COPY
+# statement below. I didn't understand what all of the columns in the input were
+# for, so I only generated the ones you see here.
+# You don't _need_ to ingest all of the columns you're not using, but it shouldn't
+# slow any queries down once the data is ingested, and I'd suggest doing it on
+# principle in case you need it for future shenanigans.
 con.sql("CREATE TABLE raw_data (count_by_word JSON, date DATE, publisher TEXT, doc TEXT);")
 
 # In theory one could ingest all the data in one statement, as described here:
