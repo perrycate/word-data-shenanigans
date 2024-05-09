@@ -11,6 +11,10 @@ INPUT_FILES = [
 
 con = duckdb.connect(DB_NAME)
 
+#
+# 1.Ingest the raw data.
+#
+
 # Improves memory usage when importing files larger than memory.
 # I don't think the input data is in any order that matters, so insertion
 # order shouldn't matter here.
@@ -38,3 +42,9 @@ for filename in INPUT_FILES:
     con.sql(f'COPY raw_data FROM "{filename}"')
     print(f"ingested {filename} in {time.time() - file_start} seconds")
 print(f"Finished in {time.time() - start_time} seconds.")
+
+#
+# 2. Transform the data into a more query-friendly schema.
+#
+
+# TODO
