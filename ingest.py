@@ -65,5 +65,5 @@ print(f"Finished in {time.time() - start_time} seconds.")
 # and thus improve the performance. If you think the count for any single word in a doc
 # could be more than 65k, feel free to change - earlier iterations used a normal-size
 # int and worked fine.
-con.sql("CREATE TABLE words (count USMALLINT, date DATE, publisher TEXT, doc TEXT)")
-# TODO(perry): Query for unnesting/pivoting counts_by_word into words table.
+con.sql("CREATE TABLE words (word TEXT, count USMALLINT, date DATE, publisher TEXT, doc TEXT);")
+con.sql("INSERT INTO words (SELECT UNNEST(json_keys(count_by_word)) as word, (count_by_word->word)::USMALLINT, date, publisher, doc FROM raw_data);")
