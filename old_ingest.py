@@ -20,6 +20,10 @@ import pyarrow.compute as pc
 #
 # I was working on a new ingest script, which is working, but incomplete. I'm gonna test my statement
 # for transforming the data and will update it. In the meantime, this script kinda-sorta works.
+#
+# The statements I ran in the duckdb interpreter after running this script were something like:
+# CREATE TABLE words(cnt INTEGER, date VARCHAR, publisher VARCHAR, word VARCHAR); -- define table to query against
+# INSERT INTO words SELECT UNNEST(word_counts).count, date, publisher, UNNEST(word_counts).word FROM raw_data; -- transform/save the data
 
 def transform_line(counts_json: str) -> list:
     return [{"word": w, "count": c} for w, c in json.loads(counts_json).items()]
