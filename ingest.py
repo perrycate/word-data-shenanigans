@@ -67,6 +67,6 @@ print(f"Finished in {time.time() - start_time} seconds.")
 # int and worked fine.
 start_time = time.time()
 print("Massaging data into query-friendly format...")
-con.sql("CREATE TABLE words (word TEXT, count USMALLINT, date DATE, publisher TEXT, doc TEXT);")
-con.sql("INSERT INTO words (SELECT UNNEST(json_keys(count_by_word)) as word, (count_by_word->word)::USMALLINT, date, publisher, doc FROM raw_data);")
+con.sql("CREATE TABLE word_counts(date DATE, count USMALLINT, publisher VARCHAR, doc VARCHAR, word VARCHAR);")
+con.sql("INSERT INTO word_counts SELECT date, UNNEST(count_by_word->'$.*'), publisher, doc, UNNEST(json_keys(count_by_word)) FROM raw_data;")
 print(f"Finished in {time.time() - start_time} seconds.")
