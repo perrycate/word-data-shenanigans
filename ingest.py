@@ -31,10 +31,19 @@ con.sql("SET preserve_insertion_order = false;")
 # int and worked fine.
 con.sql("CREATE TABLE word_counts(date DATE, cnt USMALLINT, publisher TEXT, doc TEXT, word TEXT);")
 
+con.close()
+
+# This takes about 4 hours on my machine. With inputs totalling ~1TB across 61 files,
+# it produces a db file that's ~500GB.
 start_time = time.time()
 print("Ingesting records...")
 for in_file in INPUT_FILES:
     print(f"Reading {in_file}... ", end='')
+
+    # There seems to be a memory leak in duckdb's python library.
+    # If we use the same connection for each insert, we eventually run out of memory.
+    # Closing/reopening is a stupid but functioning workaround.
+    con = duckdb.connect(DB_NAME)
     file_start = time.time()
 
     con.sql(f"""
@@ -45,6 +54,8 @@ for in_file in INPUT_FILES:
         column3::TEXT as doc,
         UNNEST(json_keys(column0)) as word
     FROM read_csv('{in_file}');""")
+
+    con.close()
 
     print(f"done ({time.time() - file_start} seconds).")
 print(f"Finished in {time.time() - start_time} seconds.")
