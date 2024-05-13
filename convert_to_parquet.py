@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Converts the csv input format into a parquet containing "unnested" rows,
-one row per (publisher, doc, word).
-"""
 
 import duckdb
 import sys
@@ -12,6 +8,10 @@ def extract_word_counts_as_parquet(
         in_file: str,
         out_file: str,
 ) -> None:
+    """
+    Converts the csv input format into a parquet containing "unnested" rows,
+    one row per (publisher, doc, word).
+    """
     con.sql(f"""
     COPY (
         SELECT
@@ -26,6 +26,7 @@ def extract_word_counts_as_parquet(
 if __name__ == '__main__':
     in_file = sys.argv[1]
     out_file = sys.argv[2]
+    print("hi")
 
     con = duckdb.connect()
 
