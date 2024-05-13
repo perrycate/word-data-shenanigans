@@ -34,7 +34,7 @@ con.sql("CREATE TABLE word_counts(date DATE, cnt USMALLINT, publisher TEXT, doc 
 start_time = time.time()
 print("Ingesting records...")
 for in_file in INPUT_FILES:
-    print(f"Extracting {in_file}... ", end='')
+    print(f"Reading {in_file}... ", end='')
     file_start = time.time()
 
     con.sql(f"""
