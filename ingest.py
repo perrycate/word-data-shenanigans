@@ -59,3 +59,11 @@ for in_file in INPUT_FILES:
 
     print(f"done ({time.time() - file_start} seconds).")
 print(f"Finished in {time.time() - start_time} seconds.")
+
+# You're done!
+# Sample query:
+#
+# Getting the sum of all the counts of a set of words:
+# SELECT word, SUM(cnt) FROM word_counts WHERE word in (SELECT word FROM lexicon) GROUP BY word;
+# I use gen_lexicon to make a table containing a lexicon, but you could just as easily load the lexicon
+# from a csv using read_csv.
