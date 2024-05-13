@@ -2,8 +2,6 @@
 import duckdb
 import time
 
-from convert_to_parquet import extract_word_counts_as_parquet
-
 DB_NAME = "words.duckdb"
 
 INPUT_FILES = [
@@ -26,36 +24,28 @@ con = duckdb.connect(DB_NAME)
 # order shouldn't matter here.
 con.sql("SET preserve_insertion_order = false;")
 
-#
-# Step 1: Convert data to more usable format.
-#
-# This takes the .csv files, extracts each key-value pair from the included json,
-# and creates parquet files where each row in the resulting parquet file is
-# 1 key:value pair in the input json.
-# We store the results in .parquet files for space efficiency.
-#
-# We could parallelize this, but at least on my machine this is already CPU-bound.
-start_time = time.time()
-print("Extracting word:count records and saving as .parquet files...")
-for i in range(len(INPUT_FILES)):
-    in_file = INPUT_FILES[i]
-    print(f"Extracting {in_file}... ", end='')
-    file_start = time.time()
-    extract_word_counts_as_parquet(con, in_file, f'extracted_{i}.parquet')
-    print(f"done ({time.time() - file_start} seconds).")
-print(f"Finished in {time.time() - start_time} seconds.")
-
-#
-# Step 2: Read data into the database.
-#
 
 # The USMALLINT instead of INT actually should save substantial memory at query time,
 # and thus improve the performance. If you think the count for any single word in a doc
 # could be more than 65k, feel free to change - earlier iterations used a normal-size
 # int and worked fine.
 con.sql("CREATE TABLE word_counts(date DATE, cnt USMALLINT, publisher TEXT, doc TEXT, word TEXT);")
+
 start_time = time.time()
-print("Ingesting data...")
-# TODO test this.
-con.sql("INSERT INTO word_counts SELECT date, cnt, publisher, doc, word FROM './*.parquet';")
+print("Ingesting records...")
+for i in range(len(INPUT_FILES)):
+    in_file = INPUT_FILES[i]
+    print(f"Extracting {in_file}... ", end='')
+    file_start = time.time()
+
+    con.sql(f"""
+    INSERT INTO word_counts SELECT
+        column1::DATE as date,
+        UNNEST(column0->'$.*')::USMALLINT as cnt,
+        column2::TEXT as publisher,
+        column3::TEXT as doc,
+        UNNEST(json_keys(column0)) as word
+    FROM read_csv('{in_file}');""")
+
+    print(f"done ({time.time() - file_start} seconds).")
 print(f"Finished in {time.time() - start_time} seconds.")
